@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++0x   CMakeFiles/MyVolumeRaycaster.dir/my_volume_raycaster.cpp.o  -o ../build/Release/MyVolumeRaycaster -rdynamic ../framework/libframework.a ../external/glfw-3.0.3/src/libglfw3.a -lX11 -lpthread -lXrandr -lXi -lXxf86vm -lrt -lm -lGL 

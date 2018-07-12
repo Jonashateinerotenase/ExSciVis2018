@@ -64,11 +64,11 @@ void main()
         discard;
 
 #if TASK == 10
-    vec4 max_val = vec4(0.0, 0.0, 0.0, 0.0);
-    
+    vec4 max_val = vec4(0.0, 0.0, 0.0, 0.0);    
     // the traversal loop,
     // termination when the sampling position is outside volume boundarys
     // another termination condition for early ray termination is added
+
     while (inside_volume) 
     {      
         // get sample
@@ -97,23 +97,43 @@ void main()
     // the traversal loop,
     // termination when the sampling position is outside volume boundarys
     // another termination condition for early ray termination is added
+
+    //Assignment 1.1
+    vec4 average = vec4(0.0, 0.0, 0.0, 0.0);
+    float incr = 0;
+
     while (inside_volume)
     {      
         // get sample
         float s = get_sample_data(sampling_pos);
-
         // dummy code
-        dst = vec4(sampling_pos, 1.0);
+        //dst = vec4(sampling_pos, 1.0);
+
+        // apply the transfer functions to retrieve color and opacity
+        vec4 color = texture(transfer_texture, vec2(s, s));
+
+        //adding up every color value to get the average
+        average.r += color.r;
+        average.g += color.g;
+        average.b += color.b;
+        average.a += color.a;
         
         // increment the ray sampling position
         sampling_pos  += ray_increment;
 
         // update the loop termination condition
         inside_volume  = inside_volume_bounds(sampling_pos);
+
+        incr = incr + 1.0;
     }
+
+    dst = average/incr;
+
 #endif
     
 #if TASK == 12 || TASK == 13
+    //Assignment 1.2 Isosurface
+
     // the traversal loop,
     // termination when the sampling position is outside volume boundarys
     // another termination condition for early ray termination is added
@@ -123,8 +143,14 @@ void main()
         float s = get_sample_data(sampling_pos);
 
         // dummy code
-        dst = vec4(light_diffuse_color, 1.0);
-
+        //dst = vec4(light_diffuse_color, 1.0);
+        
+        //iso_value from uniform upload
+        if(iso_value < s)
+        {
+            dst = vec4(0.2,0.2,0.2,1.0);
+            break;
+        }
         // increment the ray sampling position
         sampling_pos += ray_increment;
 #if TASK == 13 // Binary Search
