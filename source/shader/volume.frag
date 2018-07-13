@@ -31,6 +31,21 @@ uniform vec3    light_specular_color;
 uniform float   light_ref_coef;
 
 
+vec3 phong_lighting(vec3 normal, vec3 color, vec3 light_direction)
+{
+    vec3 output_diffuse = vec3(0);
+    float phong_diffuse;
+    phong_diffuse = dot(normal,light_direction);
+    if (phong_diffuse < 0) phong_diffuse = 0;
+    
+    output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
+    output_diffuse.y = color.y * light_diffuse_color.y * phong_diffuse;
+    output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
+
+
+ return output_diffuse;
+}
+
 bool
 inside_volume_bounds(const in vec3 sampling_position)
 {
@@ -46,6 +61,21 @@ get_sample_data(vec3 in_sampling_pos)
     return texture(volume_texture, in_sampling_pos * obj_to_tex).r;
 
 }
+
+vec3 get_gradient(vec3 in_sampling_pos)
+{
+    float h_x = max_bounds.x / volume_dimensions.x;
+    float h_y = max_bounds.y / volume_dimensions.y;
+    float h_z = max_bounds.z / volume_dimensions.z;
+
+    //delta_x = Sampling_Position(x+l,y,z) - Sampling_Position(x-l,y,z)
+    float delta_x = (get_sample_data(vec3(in_sampling_pos.x + h_x, in_sampling_pos.y, in_sampling_pos.z)) - get_sample_data(vec3(in_sampling_pos.x - h_x, in_sampling_pos.y, in_sampling_pos.z)))/2;
+    float delta_y = (get_sample_data(vec3(in_sampling_pos.x, in_sampling_pos.y + h_y, in_sampling_pos.z)) - get_sample_data(vec3(in_sampling_pos.x, in_sampling_pos.y - h_y, in_sampling_pos.z)))/2;
+    float delta_z = (get_sample_data(vec3(in_sampling_pos.x, in_sampling_pos.y, in_sampling_pos.z + h_z)) - get_sample_data(vec3(in_sampling_pos.x, in_sampling_pos.y, in_sampling_pos.z - h_z)))/2;
+
+    return vec3(delta_x, delta_y, delta_z);
+}
+
 
 void main()
 {
@@ -157,7 +187,11 @@ void main()
         IMPLEMENT;
 #endif
 #if ENABLE_LIGHTNING == 1 // Add Shading
-        IMPLEMENTLIGHT;
+        //Lightning DzzZZzzZZt
+        vec3 normal = normalize(get_gradient(sampling_pos));
+        vec3 one_direction = normalize(light_position - sampling_pos);
+        //dst = vec4(phong_lighting((normal*-1),dst.xyz,one_direction),1);
+        dst = vec4(1,0,0,1);
 #if ENABLE_SHADOWING == 1 // Add Shadows
         IMPLEMENTSHADOW;
 #endif
