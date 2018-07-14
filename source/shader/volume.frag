@@ -35,12 +35,16 @@ vec3 phong_lighting(vec3 normal, vec3 color, vec3 light_direction)
 {
     vec3 output_diffuse = vec3(0);
     float phong_diffuse;
+    float spec_k;
     phong_diffuse = dot(normal,light_direction);
+    //if smaller than zero -> phong = 0
     if (phong_diffuse < 0) phong_diffuse = 0;
-    
-    output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
-    output_diffuse.y = color.y * light_diffuse_color.y * phong_diffuse;
-    output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
+    if (phong_diffuse > 0) spec_k = pow(max(dot(normalize(light_direction + normal), normal), 0), light_ref_coef);
+    //output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
+    //output_diffuse.y = color.y * light_diffuse_color.y * phong_diffuse;
+    //output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
+
+    output_diffuse = light_ambient_color + phong_diffuse * light_diffuse_color + light_specular_color * spec_k;
 
 
  return output_diffuse;
