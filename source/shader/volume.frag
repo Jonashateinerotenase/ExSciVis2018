@@ -213,7 +213,7 @@ void main()
             //diese Werte wird zwischen den beiden sein
             vec3 newbound;
 
-            const int fineness = 10;//Anzahl der Intervalhalbierungen
+            const int fineness = 100;//Anzahl der Intervalhalbierungen
 
 
             //Der tatsächliche binary - search - Algorithmus:
@@ -223,14 +223,14 @@ void main()
                 newbound = (out_place + in_place) / 2;
                 float s_new = get_sample_data(newbound);//Die neue, hoffentlich näher dranne dichte
 
-                const float bias = 0.01;//Da man floats schwer vergleichen kann
+                const float bias = 0.001;//Da man floats schwer vergleichen kann
 
                 if(s_new == iso_value /*Exakt den wert erreicht*/
                 || abs(s_new - iso_value) < bias /*Extrem nah am wert*/)
                 {
-                    dst = texture(transfer_texture, vec2(s_new, s_new));
+                    dst = vec4(0.2,0.2,0.2,1.0);
                     i = fineness;
-                    dst = vec4(phong(newbound),1.0);
+                    if (ENABLE_LIGHTNING == 1 )dst = vec4(phong(newbound),1.0);
                 }
                 else if (s_new < iso_value)
                 {
