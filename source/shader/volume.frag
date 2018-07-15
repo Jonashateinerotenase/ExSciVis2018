@@ -164,7 +164,7 @@ void main()
         incr = incr + 1.0;
     }
 
-    dst = average/incr;
+    dst = 3*average/incr;
 
 #endif
     
@@ -183,27 +183,82 @@ void main()
         //dst = vec4(light_diffuse_color, 1.0);
         
         //iso_value from uniform upload
-        if(iso_value < s)
+        if(iso_value < s && TASK != 13)
         {
             dst = vec4(0.2,0.2,0.2,1.0);
-            
         }
         // increment the ray sampling position
+
+        vec3 prev = sampling_pos; //Vorhergehende sample position - vor dem Increment
+
         sampling_pos += ray_increment;
+
 #if TASK == 13 // Binary Search
-        IMPLEMENT;
+        /*
+            Er unterschied ist im sliding
+        */
+
+
+        //Zuerst: wir bekommen die daten aus 2 hintereinander "abgetasteten" werten
+        float s_out = get_sample_data(prev);
+        float s_in  = get_sample_data(sampling_pos);
+
+        //zwischen diesen Werteb auf dem Ray ist die Intersection mit der angegebenen sample value
+        if (s_out <= iso_value && s_in >= iso_value) 
+        {
+            //die tatsächlichen orte
+            vec3 in_place  = sampling_pos;//zu weit hinten
+            vec3 out_place = prev;        //zu weit vorne
+
+            //diese Werte wird zwischen den beiden sein
+            vec3 newbound;
+
+            const int fineness = 10;//Anzahl der Intervalhalbierungen
+
+
+            //Der tatsächliche binary - search - Algorithmus:
+            for (int i = 0; i < fineness; ++i)
+            {
+                //newbound = out_place + ((in_place - out_place) / 2); //Mitte zwischen in und out
+                newbound = (out_place + in_place) / 2;
+                float s_new = get_sample_data(newbound);//Die neue, hoffentlich näher dranne dichte
+
+                const float bias = 0.01;//Da man floats schwer vergleichen kann
+
+                if(s_new == iso_value /*Exakt den wert erreicht*/
+                || abs(s_new - iso_value) < bias /*Extrem nah am wert*/)
+                {
+                    dst = texture(transfer_texture, vec2(s_new, s_new));
+                    i = fineness;
+                    dst = vec4(phong(newbound),1.0);
+                }
+                else if (s_new < iso_value)
+                {
+                    out_place = newbound; // interval mehr nach innen 
+                }
+                else
+                {
+                    in_place = newbound; // interval mehr nach aussen
+                }
+
+
+            }
+            break;
+        }
+
+        
 #endif
 #if ENABLE_LIGHTNING == 1 // Add Shading
         if(iso_value < s)
         {
             //vec3 normal = vec3(normalize(get_gradient(sampling_pos))) * -1;
            //dst = vec4(normal,1.0);
-            dst = vec4(phong(sampling_pos),1.0);
+            if(TASK != 13)dst = vec4(phong(sampling_pos),1.0);
             break;
         }
 
 #if ENABLE_SHADOWING == 1 // Add Shadows
-        IMPLEMENTSHADOW;
+        
 #endif
 #endif
 
