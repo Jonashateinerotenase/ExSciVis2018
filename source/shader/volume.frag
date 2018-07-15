@@ -30,26 +30,6 @@ uniform vec3    light_diffuse_color;
 uniform vec3    light_specular_color;
 uniform float   light_ref_coef;
 
-
-vec3 phong_lighting(vec3 normal, vec3 color, vec3 light_direction)
-{
-    vec3 output_diffuse = vec3(0);
-    float phong_diffuse;
-    float spec_k;
-    phong_diffuse = dot(normal,light_direction);
-    //if smaller than zero -> phong = 0
-    if (phong_diffuse < 0) phong_diffuse = 0;
-    if (phong_diffuse > 0) spec_k = pow(max(dot(normalize(light_direction + normal), normal), 0), light_ref_coef);
-    //output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
-    //output_diffuse.y = color.y * light_diffuse_color.y * phong_diffuse;
-    //output_diffuse.x = color.x * light_diffuse_color.x * phong_diffuse;
-
-    output_diffuse = light_ambient_color + phong_diffuse * light_diffuse_color + light_specular_color * spec_k;
-
-
- return output_diffuse;
-}
-
 bool
 inside_volume_bounds(const in vec3 sampling_position)
 {
@@ -80,6 +60,29 @@ vec3 get_gradient(vec3 in_sampling_pos)
     return vec3(delta_x, delta_y, delta_z);
 }
 
+vec3 phong(vec3 in_sampling_position)
+{
+    vec3 phong_output = vec3(0);
+    vec3 normal = vec3(normalize(get_gradient(in_sampling_position))) * -1;
+    vec3 light_direction = vec3(normalize(light_position - in_sampling_position));
+    vec3 ref_dir = reflect(-light_direction, normal);
+
+    vec3 view_dir = normalize(light_direction + normal);
+
+    float phong_diffuse;
+    float spec_k = 0.0;
+    float speck_engel = max(dot(view_dir,normal), 0.0);
+    //speckular, es heißt speckular!!!
+    float baby_sheepertian = max(dot(normal,light_direction),0.0);
+    if (baby_sheepertian > 0.0)
+    {
+        speck_engel = max(dot(ref_dir, view_dir),0.0);
+        spec_k = pow(speck_engel,16.0);//light_ref_coef);
+    }
+    phong_output = light_ambient_color + baby_sheepertian * light_diffuse_color + spec_k * light_specular_color;
+
+ return phong_output;
+}
 
 void main()
 {
@@ -183,7 +186,7 @@ void main()
         if(iso_value < s)
         {
             dst = vec4(0.2,0.2,0.2,1.0);
-            break;
+            
         }
         // increment the ray sampling position
         sampling_pos += ray_increment;
@@ -191,11 +194,14 @@ void main()
         IMPLEMENT;
 #endif
 #if ENABLE_LIGHTNING == 1 // Add Shading
-        //Lightning DzzZZzzZZt
-        vec3 normal = normalize(get_gradient(sampling_pos));
-        vec3 one_direction = normalize(light_position - sampling_pos);
-        //dst = vec4(phong_lighting((normal*-1),dst.xyz,one_direction),1);
-        dst = vec4(1,0,0,1);
+        if(iso_value < s)
+        {
+            //vec3 normal = vec3(normalize(get_gradient(sampling_pos))) * -1;
+           //dst = vec4(normal,1.0);
+            dst = vec4(phong(sampling_pos),1.0);
+            break;
+        }
+
 #if ENABLE_SHADOWING == 1 // Add Shadows
         IMPLEMENTSHADOW;
 #endif
