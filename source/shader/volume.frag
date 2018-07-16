@@ -259,6 +259,24 @@ void main()
 
 #if ENABLE_SHADOWING == 1 // Add Shadows
         
+        vec3 shadow_sampling_pos = sampling_pos;
+        vec3 light_direction = vec3(normalize(light_position - sampling_pos));
+        vec3 light_impact = sampling_distance * light_direction;
+
+        while(inside_volume)
+        {
+            shadow_sampling_pos = shadow_sampling_pos + light_impact;
+            float in_shadow = get_sample_data(shadow_sampling_pos) - iso_value;
+
+            if(in_shadow > 0)
+            {
+                dst = vec4(0.0,0.0,0.0,1);
+                break;
+            }
+
+            inside_volume = inside_volume_bounds(shadow_sampling_pos);
+        }
+        
 #endif
 #endif
 
