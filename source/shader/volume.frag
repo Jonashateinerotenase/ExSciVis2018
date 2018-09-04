@@ -16,6 +16,9 @@ uniform mat4 Modelview;
 uniform sampler3D volume_texture;
 uniform sampler2D transfer_texture;
 
+//newstuff
+uniform float   density_slider_ref;
+//
 
 uniform vec3    camera_location;
 uniform float   sampling_distance;
@@ -150,6 +153,8 @@ void main()
         vec4 color = texture(transfer_texture, vec2(s, s));
 
         //adding up every color value to get the average
+        
+        
         average.r += color.r;
         average.g += color.g;
         average.b += color.b;
@@ -167,6 +172,38 @@ void main()
     dst = 3*average/incr;
 
 #endif
+
+#if TASK == 100
+
+    vec4 dis_val = vec4(0.0, 0.0, 0.0, 0.0);    
+
+    while (inside_volume) 
+    {      
+        // get sample
+        float s = get_sample_data(sampling_pos);
+                
+        // apply the transfer functions to retrieve color and opacity
+        vec4 color = texture(transfer_texture, vec2(s, s));
+           
+        // this is the example for maximum intensity projection
+        if((sampling_pos.x > density_slider_ref && sampling_pos.x < density_slider_ref+0.01))
+        {
+        dis_val.r = max(color.r, dis_val.r);
+        dis_val.g = max(color.g, dis_val.g);
+        dis_val.b = max(color.b, dis_val.b);
+        dis_val.a = max(color.a, dis_val.a);
+        }
+
+        
+        // increment the ray sampling position
+        sampling_pos  += ray_increment;
+
+        // update the loop termination condition
+        inside_volume  = inside_volume_bounds(sampling_pos);
+    }
+
+    dst = dis_val;
+#endif 
     
 #if TASK == 12 || TASK == 13
     //Assignment 1.2 Isosurface
@@ -248,6 +285,7 @@ void main()
 
         
 #endif
+
 #if ENABLE_LIGHTNING == 1 // Add Shading
         if(iso_value < s)
         {
@@ -311,6 +349,10 @@ void main()
         inside_volume = inside_volume_bounds(sampling_pos);
     }
 #endif 
+
+
+
+
 
     // return the calculated color value
     FragColor = dst;

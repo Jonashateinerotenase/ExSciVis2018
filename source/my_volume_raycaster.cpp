@@ -125,12 +125,14 @@ Turntable  g_turntable;
 std::string g_file_string = "../../../data/head_w256_h256_d225_c1_b8.raw";
 
 // set the sampling distance for the ray traversal
+
 float       g_sampling_distance = 0.001f;
 float       g_sampling_distance_fact = 0.5f;
 float       g_sampling_distance_fact_move = 2.0f;
-float       g_sampling_distance_fact_ref = 1.0f;
-
+float       g_sampling_distance_fact_ref = 1.0f;       
+float       g_density_slider_ref = 0.5f;
 float       g_iso_value = 0.2f;
+
 
 // set the light position and color for shading
 // set the light position and color for shading
@@ -349,6 +351,8 @@ void showGUI(){
         if (ImGui::TreeNode("Introduction")){
             ImGui::RadioButton("Max Intensity Projection", &g_task_chosen, 10);
             ImGui::RadioButton("Average Intensity Projection", &g_task_chosen, 11);
+            ImGui::RadioButton("Discrete Colouring", &g_task_chosen, 100);
+            ImGui::SliderFloat("Densidy slidering", &g_density_slider_ref, 0.0f, 1.0f, "%.5f", 4.0f);
             ImGui::TreePop();
         }
 
@@ -387,11 +391,13 @@ void showGUI(){
         bool load_volume_1 = false;
         bool load_volume_2 = false;
         bool load_volume_3 = false;
+        bool load_volume_4 = false;
 
         ImGui::Text("Volumes");
         load_volume_1 ^= ImGui::Button("Load Volume Head");
         load_volume_2 ^= ImGui::Button("Load Volume Engine");
         load_volume_3 ^= ImGui::Button("Load Volume Bucky");
+        load_volume_4 ^= ImGui::Button("Load Volume Concrete");
 
 
         if (load_volume_1){
@@ -405,6 +411,10 @@ void showGUI(){
 
         if (load_volume_3){
             g_file_string = "../../../data/Bucky_uncertainty_data_w32_h32_d32_c1_b8.raw";
+            read_volume(g_file_string);
+        }
+        if (load_volume_4){
+            g_file_string = "../../../data/Concrete_w1008_h1046_d687_c1_b16.raw";
             read_volume(g_file_string);
         }
     }
@@ -989,7 +999,13 @@ int main(int argc, char* argv[])
         glUniform3fv(glGetUniformLocation(g_volume_program, "camera_location"), 1,
             glm::value_ptr(camera_location));
         glUniform1f(glGetUniformLocation(g_volume_program, "sampling_distance"), g_sampling_distance * sampling_fact);
-        glUniform1f(glGetUniformLocation(g_volume_program, "sampling_distance_ref"), g_sampling_distance_fact_ref);
+        glUniform1f(glGetUniformLocation(g_volume_program, "sampling_distance_ref"), g_density_slider_ref);
+
+        //Neu hinzugefügt
+        glUniform1f(glGetUniformLocation(g_volume_program, "density_slider_ref"), g_density_slider_ref);
+        //###############
+
+
         glUniform1f(glGetUniformLocation(g_volume_program, "iso_value"), g_iso_value);
         glUniform3fv(glGetUniformLocation(g_volume_program, "max_bounds"), 1,
             glm::value_ptr(g_max_volume_bounds));
