@@ -131,10 +131,11 @@ float       g_sampling_distance_fact = 0.5f;
 float       g_sampling_distance_fact_move = 2.0f;
 float       g_sampling_distance_fact_ref = 1.0f;       
 float       g_density_slider_ref = 0.5f;
+float       g_fineness_grid = 0.5f;
 float       g_iso_value = 0.2f;
 
 
-// set the light position and color for shading
+
 // set the light position and color for shading
 glm::vec3   g_light_pos = glm::vec3(10.0, 10.0, 10.0);
 glm::vec3   g_ambient_light_color = glm::vec3(0.1f, 0.1f, 0.1f);
@@ -353,6 +354,8 @@ void showGUI(){
             ImGui::RadioButton("Average Intensity Projection", &g_task_chosen, 11);
             ImGui::RadioButton("Discrete Colouring", &g_task_chosen, 100);
             ImGui::SliderFloat("Densidy slidering", &g_density_slider_ref, 0.0f, 1.0f, "%.5f", 4.0f);
+            ImGui::RadioButton("Enable Grid", &g_task_chosen, 101);
+            ImGui::SliderFloat("Grid fineness", &g_fineness_grid, 0.0f, 1.0f, "%.5f", 4.0f);
             ImGui::TreePop();
         }
 
@@ -1003,6 +1006,7 @@ int main(int argc, char* argv[])
 
         //Neu hinzugefügt
         glUniform1f(glGetUniformLocation(g_volume_program, "density_slider_ref"), g_density_slider_ref);
+        glUniform1f(glGetUniformLocation(g_volume_program, "grid_fineness"), g_fineness_grid);
         //###############
 
 

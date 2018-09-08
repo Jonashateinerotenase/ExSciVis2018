@@ -40,6 +40,12 @@ inside_volume_bounds(const in vec3 sampling_position)
             && all(lessThanEqual(sampling_position, max_bounds)));
 }
 
+bool inside_half_volume(const in vec3 sampling_position)
+{
+    return (    all(greaterThanEqual(sampling_position,vec3(0.0)))
+             && all(lessThanEqual(sampling_position, vec3(max_bounds.x/2,max_bounds.y,max_bounds.z))));
+}
+
 
 float
 get_sample_data(vec3 in_sampling_pos)
@@ -102,6 +108,38 @@ void main()
     
     if (!inside_volume)
         discard;
+
+#if TASK == 101
+    vec4 max_val = vec4(0.0, 0.0, 0.0, 0.0);    
+    // the traversal loop,
+    // termination when the sampling position is outside volume boundarys
+    // another termination condition for early ray termination is added
+
+    while (inside_volume) 
+    {      
+        // get sample
+        float s = get_sample_data(sampling_pos);
+                
+        // apply the transfer functions to retrieve color and opacity
+        vec4 color = texture(transfer_texture, vec2(s, s));
+           
+        // this is the example for maximum intensity projection
+        max_val.r = max(color.r, max_val.r);
+        max_val.g = max(color.g, max_val.g);
+        max_val.b = max(color.b, max_val.b);
+        max_val.a = max(color.a, max_val.a);
+        
+        // increment the ray sampling position
+        sampling_pos  += ray_increment;
+
+        // update the loop termination condition
+        inside_volume  = inside_half_volume(sampling_pos);
+        //inside_volume  = inside_volume_bounds(sampling_pos);
+
+    }
+
+    dst = max_val;
+#endif
 
 #if TASK == 10
     vec4 max_val = vec4(0.0, 0.0, 0.0, 0.0);    
