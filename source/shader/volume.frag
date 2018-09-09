@@ -14,6 +14,7 @@ layout(location = 0) out vec4 FragColor;
 uniform mat4 Modelview;
 
 uniform sampler3D volume_texture;
+uniform sampler3D avg_texture;
 uniform sampler2D transfer_texture;
 
 //newstuff
@@ -211,7 +212,84 @@ void main()
 
 #endif
 
-#if TASK == 100
+#if TASK == 200
+
+    vec4 dis_val = vec4(0.0, 0.0, 0.0, 0.0);    
+
+    while (inside_volume) 
+    {      
+        float s = get_sample_data(sampling_pos);
+
+        vec4 color = texture(transfer_texture, vec2(s, s));
+
+        if((sampling_pos.x > density_slider_ref && sampling_pos.x < density_slider_ref+0.01))
+        {
+        dis_val.r = max(color.r, dis_val.r);
+        dis_val.g = max(color.g, dis_val.g);
+        dis_val.b = max(color.b, dis_val.b);
+        dis_val.a = max(color.a, dis_val.a);
+        }           
+
+        sampling_pos  += ray_increment;
+
+        inside_volume  = inside_volume_bounds(sampling_pos);
+    }
+
+    dst = dis_val;
+#endif 
+
+#if TASK == 300
+
+    vec4 dis_val = vec4(0.0, 0.0, 0.0, 0.0);    
+
+    while (inside_volume) 
+    {      
+        float s = get_sample_data(sampling_pos);
+
+        vec4 color = texture(transfer_texture, vec2(s, s));
+        
+        if((sampling_pos.y > density_slider_ref && sampling_pos.y < density_slider_ref+0.01))
+        {
+        dis_val.r = max(color.r, dis_val.r);
+        dis_val.g = max(color.g, dis_val.g);
+        dis_val.b = max(color.b, dis_val.b);
+        dis_val.a = max(color.a, dis_val.a);
+        }           
+
+        sampling_pos  += ray_increment;
+
+        inside_volume  = inside_volume_bounds(sampling_pos);
+    }
+
+    dst = dis_val;
+#endif 
+
+#if TASK == 400
+
+    vec4 dis_val = vec4(0.0, 0.0, 0.0, 0.0);    
+
+    while (inside_volume) 
+    {      
+        float s = get_sample_data(sampling_pos);
+
+        vec4 color = texture(transfer_texture, vec2(s, s));
+
+        if((sampling_pos.z > density_slider_ref && sampling_pos.z < density_slider_ref+0.01))
+        {
+            dis_val.r = max(color.r, dis_val.r);
+            dis_val.g = max(color.g, dis_val.g);
+            dis_val.b = max(color.b, dis_val.b);
+            dis_val.a = max(color.a, dis_val.a);
+        }
+        sampling_pos  += ray_increment;
+
+        inside_volume  = inside_volume_bounds(sampling_pos);
+    }
+
+    dst = dis_val;
+#endif 
+
+#if TASK == 101
 
     vec4 dis_val = vec4(0.0, 0.0, 0.0, 0.0);    
 
@@ -241,8 +319,8 @@ void main()
     }
 
     dst = dis_val;
-#endif 
-    
+#endif     
+
 #if TASK == 12 || TASK == 13
     //Assignment 1.2 Isosurface
 
