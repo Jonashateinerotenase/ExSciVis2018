@@ -1,0 +1,15 @@
+convertTo8bit:
+
+Takes 16 bit volume (.raw File) as an input and scales it down to 8 bit. Therefore the Data size is halved.
+Notice: Name of inpot file is hard - coded
+
+
+mycast8to8smaller:
+
+Takes an 8 bit Volume as an input, takes every sekond voxel in each direktion (x,y,z) so that the size is devided by eight. this improves performance of rendering.
+Name and size are hard - coded. If you devide an xyz component, which is not devidable by 2, you have to round up (!)
+
+
+mycastgeaveraged:
+
+Takes an 8 bit Volume as an input and averages ober each n x n x n voxel (n is defined at the beginning, should not be snaller than 8 otherwise rounding problems occur)
