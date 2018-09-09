@@ -3,13 +3,25 @@ convertTo8bit:
 Takes 16 bit volume (.raw File) as an input and scales it down to 8 bit. Therefore the Data size is halved.
 Notice: Name of inpot file is hard - coded
 
+In the same Folder with 	Concrete_w1008_h1046_d687_c1_b16.raw
+DO:							g++ convertTo8bit.cpp -o convertTo8bit && ./convertTo8bit
+Yields "Concrete_w1008_h1046_d687_c1_b8.raw"
+
 
 mycast8to8smaller:
 
 Takes an 8 bit Volume as an input, takes every sekond voxel in each direktion (x,y,z) so that the size is devided by eight. this improves performance of rendering.
 Name and size are hard - coded. If you devide an xyz component, which is not devidable by 2, you have to round up (!)
 
+In the same Folder with 	Concrete_w1008_h1046_d687_c1_b8.raw
+DO:							g++ mycast8to8smaller.cpp -o scaledown && ./scaledown
+Yields "Concrete_w504_h523_d344_c1_b8.raw"
+
 
 mycastgeaveraged:
 
 Takes an 8 bit Volume as an input and averages ober each n x n x n voxel (n is defined at the beginning, should not be snaller than 8 otherwise rounding problems occur)
+
+In the same Folder with 	Concrete_w504_h523_d344_c1_b8.raw
+DO:							g++ mycastgeaveraged.cpp -o average && ./average
+Yields "ConcreteAVG100_w504_h523_d344_c1_b8.raw"

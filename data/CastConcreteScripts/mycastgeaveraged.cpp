@@ -73,7 +73,7 @@ int main()
 
   
 
-  std::ofstream out("ConcreteAVG100_w504_h523_d344_c1_b8.raw", std::ios::binary);
+  std::ofstream out("ConcreteAVG_w504_h523_d344_c1_b8.raw", std::ios::binary);
   out.write((char*)&data[0], data.size()*sizeof(char));
   out.close();
 
