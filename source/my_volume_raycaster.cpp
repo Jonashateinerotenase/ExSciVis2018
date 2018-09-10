@@ -191,8 +191,7 @@ glm::vec3 g_max_volume_bounds;
 unsigned g_channel_size = 0;
 unsigned g_channel_count = 0;
 GLuint g_volume_texture = 0;
-//new
-GLuint g_avg_volume_texture =0;
+
 Cube g_cube;
 
 int g_bilinear_interpolation = true;
@@ -298,36 +297,6 @@ bool read_volume(std::string& volume_string){
 
 }
 
-bool read_volume_avg(std::string& volume_string)
-{
-    //init volume g_volume_loader
-    //Volume_loader_raw g_volume_loader;
-    //read volume dimensions
-    g_vol_dimensions = g_volume_loader.get_dimensions(g_file_string);
-
-    g_sampling_distance = 1.0f / glm::max(glm::max(g_vol_dimensions.x, g_vol_dimensions.y), g_vol_dimensions.z);
-
-    unsigned max_dim = std::max(std::max(g_vol_dimensions.x,
-        g_vol_dimensions.y),
-        g_vol_dimensions.z);
-
-    // calculating max volume bounds of volume (0.0 .. 1.0)
-    g_max_volume_bounds = glm::vec3(g_vol_dimensions) / glm::vec3((float)max_dim);
-
-    // loading volume file data
-    g_volume_data = g_volume_loader.load_volume(g_file_string);
-    g_channel_size = g_volume_loader.get_bit_per_channel(g_file_string) / 8;
-    g_channel_count = g_volume_loader.get_channel_count(g_file_string);
-
-    // setting up proxy geometry
-    g_cube.freeVAO();
-    g_cube = Cube(glm::vec3(0.0, 0.0, 0.0), g_max_volume_bounds);
-
-    glActiveTexture(GL_TEXTURE2);
-    g_avg_volume_texture = createTexture3D(g_vol_dimensions.x, g_vol_dimensions.y, g_vol_dimensions.z, g_channel_size, g_channel_count, (char*)&g_volume_data[0]);
-
-    return 0 != g_avg_volume_texture;
-}
 
 void UpdateImGui()
 {
@@ -381,12 +350,11 @@ void showGUI(){
     }
     const float ms_per_frame_avg = ms_per_frame_accum / 120;
 
-    if (ImGui::CollapsingHeader("Task", 0, true, true))
+    if (ImGui::CollapsingHeader("Task", 0, true, false))
     {        
         if (ImGui::TreeNode("Introduction")){
             ImGui::RadioButton("Max Intensity Projection", &g_task_chosen, 10);
             ImGui::RadioButton("Average Intensity Projection", &g_task_chosen, 11);
-            //ImGui::SliderFloat("Grid fineness", &g_fineness_grid, 0.0f, 1.0f, "%.5f", 4.0f);
             ImGui::TreePop();
         }
 
@@ -417,7 +385,7 @@ void showGUI(){
             g_task_chosen_old = g_task_chosen;
         }
     }
-    if (ImGui::CollapsingHeader("Stuff", 0, true, false))
+    if (ImGui::CollapsingHeader("Interaction Techniques", 0, true, false))
     {
         if (ImGui::TreeNode("Slicing through axes")){
             ImGui::RadioButton("x", &g_task_chosen, 200);
@@ -427,16 +395,16 @@ void showGUI(){
             ImGui::SliderFloat("Navigation", &g_density_slider_ref, 0.0f, 1.0f, "%.5f", 1.0f);
             ImGui::TreePop();
         }
-         if (ImGui::TreeNode("Average grid")){
-            ImGui::RadioButton("Averaged grid differentiation slider", &g_task_chosen, 101);
-            ImGui::Text("original <-----> averaged");
+         if (ImGui::TreeNode("Compare")){
+            ImGui::RadioButton("Slider", &g_task_chosen, 333);
+            ImGui::Text("Original <-----> Averaged");
             ImGui::SliderFloat("Weighting", &g_weighting_ref, 0.0f, 1.0f, "%.5f", 1.0f);
             ImGui::TreePop();
             }
         
     }
 
-    if (ImGui::CollapsingHeader("Load Volumes", 0, true, false))
+    if (ImGui::CollapsingHeader("Load Volumemort", 0, true, false))
     {
 
 
@@ -446,6 +414,7 @@ void showGUI(){
         bool load_volume_4 = false;
         bool load_volume_5 = false;
         bool load_volume_6 = false;
+        bool load_volume_7 = false;
 
         ImGui::Text("Volumes");
         load_volume_1 ^= ImGui::Button("Load Volume Head");
@@ -454,6 +423,7 @@ void showGUI(){
         load_volume_4 ^= ImGui::Button("Load Volume Concrete");
         load_volume_5 ^= ImGui::Button("Load Volume Concrete (Performant)");
         load_volume_6 ^= ImGui::Button("Load Volume Concrete Averaged");
+        load_volume_7 ^= ImGui::Button("Load Volume Original & Averaged Volume Concrete");
 
 
         if (load_volume_1){
@@ -479,6 +449,10 @@ void showGUI(){
         }
         if (load_volume_6){
             g_file_string = "../../../data/ConcreteAVG_w504_h523_d344_c1_b8.raw";
+            read_volume(g_file_string);
+        }
+        if (load_volume_7){
+            g_file_string = "../../../data/ConcreteTwice_w504_h523_d687_c1_b8.raw";
             read_volume(g_file_string);
         }
     }
@@ -1059,8 +1033,6 @@ int main(int argc, char* argv[])
 
         glUniform1i(glGetUniformLocation(g_volume_program, "volume_texture"), 0);
         glUniform1i(glGetUniformLocation(g_volume_program, "transfer_texture"), 1);
-        //auch neu hinzugefügt
-        glUniform1i(glGetUniformLocation(g_volume_program, "avg_texture"),0);  // null oder eins?
 
         glUniform3fv(glGetUniformLocation(g_volume_program, "camera_location"), 1,
             glm::value_ptr(camera_location));
@@ -1070,6 +1042,7 @@ int main(int argc, char* argv[])
         //Neu hinzugefügt
         glUniform1f(glGetUniformLocation(g_volume_program, "density_slider_ref"), g_density_slider_ref);
         glUniform1f(glGetUniformLocation(g_volume_program, "grid_fineness"), g_fineness_grid);
+        glUniform1f(glGetUniformLocation(g_volume_program, "avg_weighting"), g_weighting_ref);
         //###############
 
 

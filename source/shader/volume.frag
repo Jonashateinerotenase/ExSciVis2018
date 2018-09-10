@@ -14,11 +14,11 @@ layout(location = 0) out vec4 FragColor;
 uniform mat4 Modelview;
 
 uniform sampler3D volume_texture;
-uniform sampler3D avg_texture;
 uniform sampler2D transfer_texture;
 
 //newstuff
 uniform float   density_slider_ref;
+uniform float   avg_weighting;
 //
 
 uniform vec3    camera_location;
@@ -47,13 +47,18 @@ bool inside_half_volume(const in vec3 sampling_position)
              && all(lessThanEqual(sampling_position, vec3(max_bounds.x/2,max_bounds.y,max_bounds.z))));
 }
 
-
 float
 get_sample_data(vec3 in_sampling_pos)
 {
     vec3 obj_to_tex = vec3(1.0) / max_bounds;
     return texture(volume_texture, in_sampling_pos * obj_to_tex).r;
+}
 
+float
+get_avg_sample_data(vec3 in_sampling_pos)
+{
+    vec3 obj_to_tex = vec3(1.0) / vec3(max_bounds.x/2, max_bounds.y/2, max_bounds.z/2);
+    return texture(volume_texture, in_sampling_pos * obj_to_tex).r;
 }
 
 vec3 get_gradient(vec3 in_sampling_pos)
@@ -289,36 +294,28 @@ void main()
     dst = dis_val;
 #endif 
 
-#if TASK == 101
+#if TASK == 333  
 
-    vec4 dis_val = vec4(0.0, 0.0, 0.0, 0.0);    
+    vec4 color_avg = vec4(0.0,0.0,0.0,1.0);
 
     while (inside_volume) 
     {      
-        // get sample
         float s = get_sample_data(sampling_pos);
+        //does not get right data 
+        float t = get_avg_sample_data(sampling_pos);
                 
-        // apply the transfer functions to retrieve color and opacity
-        vec4 color = texture(transfer_texture, vec2(s, s));
+        vec4 color_one = texture(transfer_texture, vec2(s, s));
+        vec4 color_two = texture(transfer_texture, vec2(t, t));
+        //vec4 und der Tag gehoert dir.
+        color_avg = vec4((color_one * avg_weighting) + (color_two * (1 - avg_weighting)));
            
-        // this is the example for maximum intensity projection
-        if((sampling_pos.x > density_slider_ref && sampling_pos.x < density_slider_ref+0.01))
-        {
-        dis_val.r = max(color.r, dis_val.r);
-        dis_val.g = max(color.g, dis_val.g);
-        dis_val.b = max(color.b, dis_val.b);
-        dis_val.a = max(color.a, dis_val.a);
-        }
 
-        
-        // increment the ray sampling position
         sampling_pos  += ray_increment;
 
-        // update the loop termination condition
         inside_volume  = inside_volume_bounds(sampling_pos);
     }
 
-    dst = dis_val;
+    dst = color_avg;
 #endif     
 
 #if TASK == 12 || TASK == 13
