@@ -415,6 +415,7 @@ void showGUI(){
         bool load_volume_5 = false;
         bool load_volume_6 = false;
         bool load_volume_7 = false;
+        bool load_volume_8 = false;
 
         ImGui::Text("Volumes");
         load_volume_1 ^= ImGui::Button("Load Volume Head");
@@ -424,6 +425,7 @@ void showGUI(){
         load_volume_5 ^= ImGui::Button("Load Volume Concrete (Performant)");
         load_volume_6 ^= ImGui::Button("Load Volume Concrete Averaged");
         load_volume_7 ^= ImGui::Button("Load Volume Original & Averaged Volume Concrete");
+        load_volume_8 ^= ImGui::Button("Load Volume Smooth");
 
 
         if (load_volume_1){
@@ -453,6 +455,10 @@ void showGUI(){
         }
         if (load_volume_7){
             g_file_string = "../../../data/ConcreteTwice_w504_h523_d687_c1_b8.raw";
+            read_volume(g_file_string);
+        }
+        if (load_volume_8){
+            g_file_string = "../../../data/ConcreteSMTH_w504_h523_d344_c1_b8.raw";
             read_volume(g_file_string);
         }
     }
