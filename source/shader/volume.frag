@@ -300,16 +300,17 @@ void main()
 
     while (inside_volume) 
     {      
-        float s = get_sample_data(sampling_pos);
+        vec3 vol_dim = sampling_pos - vec3(0.0,0.0,687.0 / 2.0)
+        float s = get_sample_data(vol_dim);
         //does not get right data 
-        float t = get_avg_sample_data(sampling_pos);
+        vec3 half_vol_dim = sampling_pos + vec3(0.0, 0.0, 687.0 / 2.0);
+        float t = get_sample_data(half_vol_dim);
                 
         vec4 color_one = texture(transfer_texture, vec2(s, s));
         vec4 color_two = texture(transfer_texture, vec2(t, t));
         //vec4 und der Tag gehoert dir.
         color_avg = vec4((color_one * avg_weighting) + (color_two * (1 - avg_weighting)));
            
-
         sampling_pos  += ray_increment;
 
         inside_volume  = inside_volume_bounds(sampling_pos);
