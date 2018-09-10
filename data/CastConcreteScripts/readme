@@ -25,3 +25,12 @@ Takes an 8 bit Volume as an input and averages ober each n x n x n voxel (n is d
 In the same Folder with 	Concrete_w504_h523_d344_c1_b8.raw
 DO:							g++ mycastgeaveraged.cpp -o average && ./average
 Yields "ConcreteAVG100_w504_h523_d344_c1_b8.raw"
+
+
+mycastgeaveragedsmooth:
+
+Takes the output of mycast8to8smaller to make a kind of contiuous interpolation of the average concrete version. The both "GRIDFINENESS" values have to match.
+
+In the same Folder with 	Concrete_w504_h523_d344_c1_b8.raw
+DO:							g++ mycastgeaveragedsmooth.cpp -o averagesmooth && ./averagesmooth
+Yields "ConcreteSMTH_w504_h523_d344_c1_b8.raw"
