@@ -24,7 +24,7 @@ Takes an 8 bit Volume as an input and averages ober each n x n x n voxel (n is d
 
 In the same Folder with 	Concrete_w504_h523_d344_c1_b8.raw
 DO:							g++ mycastgeaveraged.cpp -o average && ./average
-Yields "ConcreteAVG100_w504_h523_d344_c1_b8.raw"
+Yields "ConcreteAVG_w504_h523_d344_c1_b8.raw"
 
 
 mycastgeaveragedsmooth:
