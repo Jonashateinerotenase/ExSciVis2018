@@ -186,11 +186,14 @@ bool  g_pause = false;
 
 Volume_loader_raw g_volume_loader;
 volume_data_type g_volume_data;
+volume_data_type g_volume_data2;
+
 glm::ivec3 g_vol_dimensions;
 glm::vec3 g_max_volume_bounds;
 unsigned g_channel_size = 0;
 unsigned g_channel_count = 0;
 GLuint g_volume_texture = 0;
+GLuint avg_volume_texture = 0 ;
 
 Cube g_cube;
 
@@ -283,6 +286,8 @@ bool read_volume(std::string& volume_string){
 
     // loading volume file data
     g_volume_data = g_volume_loader.load_volume(g_file_string);
+    g_volume_data2 = g_volume_loader.load_volume(g_file_string);
+
     g_channel_size = g_volume_loader.get_bit_per_channel(g_file_string) / 8;
     g_channel_count = g_volume_loader.get_channel_count(g_file_string);
 
@@ -292,8 +297,11 @@ bool read_volume(std::string& volume_string){
 
     glActiveTexture(GL_TEXTURE0);
     g_volume_texture = createTexture3D(g_vol_dimensions.x, g_vol_dimensions.y, g_vol_dimensions.z, g_channel_size, g_channel_count, (char*)&g_volume_data[0]);
+    glActiveTexture(GL_TEXTURE2);
+    avg_volume_texture  = createTexture3D(g_vol_dimensions.x, g_vol_dimensions.y, g_vol_dimensions.z, g_channel_size, g_channel_count, (char*)&g_volume_data2[0]);
 
-    return 0 != g_volume_texture;
+
+    return 0 != g_volume_texture && 0 != avg_volume_texture ;
 
 }
 
@@ -1039,6 +1047,7 @@ int main(int argc, char* argv[])
 
         glUniform1i(glGetUniformLocation(g_volume_program, "volume_texture"), 0);
         glUniform1i(glGetUniformLocation(g_volume_program, "transfer_texture"), 1);
+        glUniform1i(glGetUniformLocation(g_volume_program, "avg_volume_texture"), 2);
 
         glUniform3fv(glGetUniformLocation(g_volume_program, "camera_location"), 1,
             glm::value_ptr(camera_location));
