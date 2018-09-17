@@ -286,7 +286,7 @@ bool read_volume(std::string& volume_string){
 
     // loading volume file data
     g_volume_data = g_volume_loader.load_volume(g_file_string);
-    g_volume_data2 = g_volume_loader.load_volume(g_file_string);
+    g_volume_data2 = g_volume_loader.load_volume("../../../data/ConcreteAVG_w504_h523_d344_c1_b8.raw");
 
     g_channel_size = g_volume_loader.get_bit_per_channel(g_file_string) / 8;
     g_channel_count = g_volume_loader.get_channel_count(g_file_string);
@@ -297,6 +297,7 @@ bool read_volume(std::string& volume_string){
 
     glActiveTexture(GL_TEXTURE0);
     g_volume_texture = createTexture3D(g_vol_dimensions.x, g_vol_dimensions.y, g_vol_dimensions.z, g_channel_size, g_channel_count, (char*)&g_volume_data[0]);
+    
     glActiveTexture(GL_TEXTURE2);
     avg_volume_texture  = createTexture3D(g_vol_dimensions.x, g_vol_dimensions.y, g_vol_dimensions.z, g_channel_size, g_channel_count, (char*)&g_volume_data2[0]);
 
@@ -358,7 +359,7 @@ void showGUI(){
     }
     const float ms_per_frame_avg = ms_per_frame_accum / 120;
 
-    if (ImGui::CollapsingHeader("Task", 0, true, false))
+    if (ImGui::CollapsingHeader("Task", 0, true, true))
     {        
         if (ImGui::TreeNode("Introduction")){
             ImGui::RadioButton("Max Intensity Projection", &g_task_chosen, 10);
